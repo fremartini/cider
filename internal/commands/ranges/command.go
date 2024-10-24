@@ -2,6 +2,7 @@ package ranges
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"strings"
 	"text/tabwriter"
@@ -25,7 +26,7 @@ func (*handler) Handle() error {
 }
 
 func parseText() []*subnet {
-	t := strings.Split(ranges, ",")
+	t := strings.Split(strings.ReplaceAll(ranges, "\n", ""), LINE_DELIMITER)
 
 	subnets := []*subnet{}
 	for _, line := range t {
@@ -42,10 +43,18 @@ func parseText() []*subnet {
 func printOutput(subnets []*subnet) error {
 	w := tabwriter.NewWriter(os.Stdout, 2, 4, 1, ' ', 0)
 
-	fmt.Fprint(w, "CIDR\tSubnet Mask\t# of addresses\tWildcard\n")
+	fmt.Fprint(w, "CIDR\tSubnet Mask\tAddresses\n")
 	for _, subnet := range subnets {
-		fmt.Fprintf(w, "%s\t%s\t%v\t%s", subnet.CIDR, subnet.Mask, subnet.NumAddresses, subnet.Wildcard)
+		numAddresses := calculateNumAddresses(32, subnet.CIDR)
+
+		fmt.Fprintf(w, "/%v\t%s\t%v\n", subnet.CIDR, subnet.Mask, numAddresses)
 	}
 
 	return w.Flush()
+}
+
+func calculateNumAddresses(addressLength, prefixLength uint) uint {
+	numAddresses := math.Pow(2, float64(addressLength)-float64(prefixLength))
+
+	return uint(numAddresses)
 }
