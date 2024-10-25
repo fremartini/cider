@@ -9,8 +9,7 @@ import (
 )
 
 const (
-	ENTRY_DELIMITER = ";"
-	LINE_DELIMITER  = ","
+	LINE_DELIMITER = ","
 )
 
 type handler struct{}
@@ -26,13 +25,17 @@ func (*handler) Handle() error {
 }
 
 func parseText() []*subnet {
-	t := strings.Split(strings.ReplaceAll(ranges, "\n", ""), LINE_DELIMITER)
+	masks := strings.Split(strings.ReplaceAll(ranges, "\n", ""), LINE_DELIMITER)
 
 	subnets := []*subnet{}
-	for _, line := range t {
-		s := strings.Split(line, ENTRY_DELIMITER)
+	for cidr := 0; cidr < 33; cidr++ {
+		numAddresses := calculateNumAddresses(32, cidr)
 
-		snet := SubnetFromText(s)
+		snet := &subnet{
+			CIDR:         uint(cidr),
+			Mask:         masks[cidr],
+			NumAddresses: numAddresses,
+		}
 
 		subnets = append(subnets, snet)
 	}
@@ -45,15 +48,14 @@ func printOutput(subnets []*subnet) error {
 
 	fmt.Fprint(w, "CIDR\tSubnet Mask\tAddresses\n")
 	for _, subnet := range subnets {
-		numAddresses := calculateNumAddresses(32, subnet.CIDR)
 
-		fmt.Fprintf(w, "/%v\t%s\t%v\n", subnet.CIDR, subnet.Mask, numAddresses)
+		fmt.Fprintf(w, "/%v\t%s\t%v\n", subnet.CIDR, subnet.Mask, subnet.NumAddresses)
 	}
 
 	return w.Flush()
 }
 
-func calculateNumAddresses(addressLength, prefixLength uint) uint {
+func calculateNumAddresses(addressLength, prefixLength int) uint {
 	numAddresses := math.Pow(2, float64(addressLength)-float64(prefixLength))
 
 	return uint(numAddresses)
