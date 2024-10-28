@@ -15,12 +15,14 @@ func main() {
 		Commands: []*cli.Command{
 			{
 				Name:    "ranges",
-				Usage:   "display cidr ranges",
+				Usage:   "display all CIDR ranges",
 				Aliases: []string{"r"},
-				Action: func(*cli.Context) error {
+				Action: func(c *cli.Context) error {
+					arg := c.Args().First()
+
 					handler := ranges.New()
 
-					return handler.Handle()
+					return handler.PrintAllCIDRBlocks(arg)
 				},
 			},
 		},

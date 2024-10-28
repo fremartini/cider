@@ -9,46 +9,77 @@ import (
 	"text/tabwriter"
 )
 
+const (
+	INT_SIZE = 32
+)
+
 type handler struct{}
 
 func New() *handler {
 	return &handler{}
 }
 
-func (*handler) Handle() error {
-	table := generateCIDRTable()
+func (*handler) PrintAllCIDRBlocks(arg string) error {
 
-	return printOutput(table)
-}
+	// no args
+	if arg == "" {
+		table := calculateAllCIDRBlocks()
 
-func generateCIDRTable() []*CIDRNetwork {
-	subnets := []*CIDRNetwork{}
-	for cidr := 0; cidr < 33; cidr++ {
-		numAddresses := calculateNumAddresses(32, cidr)
-		mask := calculateSubnetMask(cidr)
-
-		snet := &CIDRNetwork{
-			NetworkPortion: uint(cidr),
-			SubnetMask:     mask,
-			AvailableHosts: numAddresses,
-		}
-
-		subnets = append(subnets, snet)
+		return printCIDRBlocks(table)
 	}
 
-	return subnets
+	// argument was given - try to parse it
+	cidr, err := strconv.ParseInt(arg, 10, INT_SIZE)
+
+	if err != nil {
+		return fmt.Errorf("%s is not a valid integer", arg)
+	}
+
+	if cidr < 0 || cidr > INT_SIZE {
+		return fmt.Errorf("%v is not a valid size - must be between 0 and 32", cidr)
+	}
+
+	block := calculateCIDRBlock(int(cidr))
+
+	table := []*CIDRBlock{block}
+
+	return printCIDRBlocks(table)
+}
+
+func calculateAllCIDRBlocks() []*CIDRBlock {
+	blocks := []*CIDRBlock{}
+	for cidr := 0; cidr < INT_SIZE+1; cidr++ {
+		block := calculateCIDRBlock(cidr)
+
+		blocks = append(blocks, block)
+	}
+
+	return blocks
+}
+
+func calculateCIDRBlock(cidr int) *CIDRBlock {
+	numAddresses := calculateNumAddresses(INT_SIZE, cidr)
+	mask := calculateSubnetMask(cidr)
+
+	block := &CIDRBlock{
+		NetworkPortion: uint(cidr),
+		SubnetMask:     mask,
+		AvailableHosts: numAddresses,
+	}
+
+	return block
 }
 
 func calculateSubnetMask(cidr int) string {
 	ones := strings.Repeat("1", cidr)
-	zeroes := strings.Repeat("0", 32-cidr)
+	zeroes := strings.Repeat("0", INT_SIZE-cidr)
 
 	mask := ones + zeroes
 
-	octet1 := must(strconv.ParseInt(mask[0:8], 2, 32))
-	octet2 := must(strconv.ParseInt(mask[8:16], 2, 32))
-	octet3 := must(strconv.ParseInt(mask[16:24], 2, 32))
-	octet4 := must(strconv.ParseInt(mask[24:32], 2, 32))
+	octet1 := must(strconv.ParseInt(mask[0:8], 2, INT_SIZE))
+	octet2 := must(strconv.ParseInt(mask[8:16], 2, INT_SIZE))
+	octet3 := must(strconv.ParseInt(mask[16:24], 2, INT_SIZE))
+	octet4 := must(strconv.ParseInt(mask[24:32], 2, INT_SIZE))
 
 	return fmt.Sprintf("%v.%v.%v.%v", octet1, octet2, octet3, octet4)
 }
@@ -59,12 +90,12 @@ func calculateNumAddresses(addressLength, prefixLength int) uint {
 	return uint(numAddresses)
 }
 
-func printOutput(subnets []*CIDRNetwork) error {
+func printCIDRBlocks(blocks []*CIDRBlock) error {
 	w := tabwriter.NewWriter(os.Stdout, 2, 4, 1, ' ', 0)
 
 	fmt.Fprint(w, "CIDR\tSubnet Mask\tAddresses\n")
-	for _, subnet := range subnets {
-		fmt.Fprintf(w, "/%v\t%s\t%v\n", subnet.NetworkPortion, subnet.SubnetMask, subnet.AvailableHosts)
+	for _, block := range blocks {
+		fmt.Fprintf(w, "/%v\t%s\t%v\n", block.NetworkPortion, block.SubnetMask, block.AvailableHosts)
 	}
 
 	return w.Flush()
