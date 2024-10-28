@@ -1,7 +1,7 @@
 package ranges
 
-type subnet struct {
-	CIDR         uint   // 0
-	Mask         string // 0.0.0.0
-	NumAddresses uint   // 4294967296
+type CIDRNetwork struct {
+	NetworkPortion uint   // 0
+	SubnetMask     string // 0.0.0.0
+	AvailableHosts uint   // 4294967296
 }
