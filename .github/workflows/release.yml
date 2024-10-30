@@ -23,6 +23,12 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - name: Set environment variables
+      run: |
+        echo "OS_GOOS=$(echo ${{ matrix.OS }} | cut -d "/" -f 1)" >> $GITHUB_ENV
+        echo "OS_GOARCH=$(echo ${{ matrix.OS }} | cut -d "/" -f 2)" >> $GITHUB_ENV
+      shell: bash
+
     - name: Sanity check
       run: |
         echo "Version: ${{ env.VERSION }}"
@@ -31,12 +37,8 @@ jobs:
         echo "Executable name: ${{ env.EXECUTABLE_NAME }}"
         echo "Go version: ${{ env.GO_VERSION }}"
         echo "OS: ${{ matrix.OS }}"
-      shell: bash
-
-    - name: Set environment variables
-      run: |
-        echo "OS_GOOS=$(echo ${{ matrix.OS }} | cut -d "/" -f 1)" >> $GITHUB_ENV
-        echo "OS_GOARCH=$(echo ${{ matrix.OS }} | cut -d "/" -f 2)" >> $GITHUB_ENV
+        echo "OS_GOOS: ${{ env.OS_GOOS }}"
+        echo "OS_GOARCH: ${{ env.OS_GOARCH }}"
       shell: bash
 
     - name: Set up Go
