@@ -25,7 +25,8 @@ jobs:
         echo "Version: ${{ env.VERSION }}"
         echo "Repository name: ${{ env.REPO_NAME }}"
         echo "Out folder: ${{ env.OUT_FOLDER }}"
-        echo "Version: ${{ env.GO_VERSION }}"
+        echo "Executable name: ${{ env.EXECUTABLE_NAME }}"
+        echo "Go version: ${{ env.GO_VERSION }}"
       shell: bash
 
     - name: Set up Go
@@ -37,12 +38,8 @@ jobs:
       run: go build -o ${{ env.EXECUTABLE_NAME }}
       shell: bash
 
-    - name: Set GOOS and GOARCH
-      run: GOOS=windows && GOARCH=amd64
-      shell: bash
-
     - name: Build Windows
-      run: go build -o ${{ env.EXECUTABLE_NAME }}.exe
+      run: GOOS=windows GOARCH=amd64 go build -o ${{ env.EXECUTABLE_NAME }}.exe
       shell: bash
 
     - name: Create archive
