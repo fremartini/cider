@@ -21,10 +21,12 @@ jobs:
 
     - name: Sanity check
       run: |
-        echo "${{ env.VERSION }}"
-        echo "${{ env.REPO_NAME }}"
-        echo "${{ env.OUT_FOLDER }}"
-        echo "${{ env.GO_VERSION }}"
+        echo "Version: ${{ env.VERSION }}"
+        echo "Repository name: ${{ env.REPO_NAME }}"
+        echo "Out folder: ${{ env.OUT_FOLDER }}"
+        echo "Version: ${{ env.GO_VERSION }}"
+        echo "GOOS: $GOOS"
+        echo "GOARCH: $GOARCH"
       shell: bash
 
     - name: Set up Go
@@ -45,7 +47,7 @@ jobs:
       shell: bash
 
     - name: Create archive
-      run: zip ${{ env.OUT_FOLDER }} ./
+      run: zip -r ${{ env.OUT_FOLDER }} ./
       shell: bash
 
     - name: Upload artifact
