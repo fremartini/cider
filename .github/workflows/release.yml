@@ -16,6 +16,9 @@ permissions:
 
 jobs:
   build:
+    strategy:
+      matrix:
+        OS: ["windows/amd64", "linux/amd64"]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -27,6 +30,13 @@ jobs:
         echo "Out folder: ${{ env.OUT_FOLDER }}"
         echo "Executable name: ${{ env.EXECUTABLE_NAME }}"
         echo "Go version: ${{ env.GO_VERSION }}"
+        echo "OS: ${{ matrix.OS }}"
+      shell: bash
+
+    - name: Set environment variables
+      run: |
+        echo "OS_GOOS=$(echo ${{ matrix.OS }} | cut -d "/" -f 1)" >> $GITHUB_ENV
+        echo "OS_GOARCH=$(echo ${{ matrix.OS }} | cut -d "/" -f 2)" >> $GITHUB_ENV
       shell: bash
 
     - name: Set up Go
@@ -34,12 +44,8 @@ jobs:
       with:
         go-version: ${{ env.GO_VERSION }}
 
-    - name: Build Linux
-      run: go build -o ${{ env.EXECUTABLE_NAME }}
-      shell: bash
-
-    - name: Build Windows
-      run: GOOS=windows GOARCH=amd64 go build -o ${{ env.EXECUTABLE_NAME }}.exe
+    - name: Build ${{ env.OS_GOOS }}/${{ env.OS_GOARCH }}
+      run: GOOS=${{ env.OS_GOOS }} GOARCH=${{ env.OS_GOARCH }} go build -o ${{ env.EXECUTABLE_NAME }}.exe
       shell: bash
 
     - name: Create archive
@@ -51,5 +57,5 @@ jobs:
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         file: ${{ env.OUT_FOLDER }}.zip
-        asset_name: "${{ env.REPO_NAME }}-${{ env.VERSION }}.zip"
+        asset_name: "${{ env.REPO_NAME }}-${{ env.OS_GOOS }}-${{ env.OS_GOARCH }}-${{ env.VERSION }}.zip"
         tag: ${{ github.ref }}
