@@ -19,8 +19,7 @@ func New() *handler {
 	return &handler{}
 }
 
-func (*handler) PrintAllCIDRBlocks(arg string) error {
-
+func (*handler) Handle(arg string) error {
 	// no args
 	if arg == "" {
 		table := calculateAllCIDRBlocks()
@@ -76,10 +75,11 @@ func calculateSubnetMask(cidr int) string {
 
 	mask := ones + zeroes
 
-	octet1 := must(strconv.ParseInt(mask[0:8], 2, INT_SIZE))
-	octet2 := must(strconv.ParseInt(mask[8:16], 2, INT_SIZE))
-	octet3 := must(strconv.ParseInt(mask[16:24], 2, INT_SIZE))
-	octet4 := must(strconv.ParseInt(mask[24:32], 2, INT_SIZE))
+	base := 2
+	octet1 := must(strconv.ParseInt(mask[0:8], base, INT_SIZE))
+	octet2 := must(strconv.ParseInt(mask[8:16], base, INT_SIZE))
+	octet3 := must(strconv.ParseInt(mask[16:24], base, INT_SIZE))
+	octet4 := must(strconv.ParseInt(mask[24:32], base, INT_SIZE))
 
 	return fmt.Sprintf("%v.%v.%v.%v", octet1, octet2, octet3, octet4)
 }

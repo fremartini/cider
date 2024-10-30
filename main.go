@@ -1,6 +1,7 @@
 package main
 
 import (
+	"cider/internal/commands/in"
 	"cider/internal/commands/ranges"
 	"log"
 	"os"
@@ -22,7 +23,19 @@ func main() {
 
 					handler := ranges.New()
 
-					return handler.PrintAllCIDRBlocks(arg)
+					return handler.Handle(arg)
+				},
+			},
+			{
+				Name:    "in",
+				Usage:   "determine if an ip falls within a range",
+				Aliases: []string{"i"},
+				Action: func(c *cli.Context) error {
+					args := c.Args().Slice()
+
+					handler := in.New()
+
+					return handler.Handle(args)
 				},
 			},
 		},
