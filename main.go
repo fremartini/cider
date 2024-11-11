@@ -16,7 +16,7 @@ func main() {
 		Commands: []*cli.Command{
 			{
 				Name:    "ranges",
-				Usage:   "display all CIDR ranges",
+				Usage:   "Displays all CIDR ranges",
 				Aliases: []string{"r"},
 				Action: func(c *cli.Context) error {
 					arg := c.Args().First()
@@ -28,7 +28,7 @@ func main() {
 			},
 			{
 				Name:    "in",
-				Usage:   "determine if an ip falls within a range",
+				Usage:   "Determines if an ip falls within a range",
 				Aliases: []string{"i"},
 				Action: func(c *cli.Context) error {
 					args := c.Args().Slice()
