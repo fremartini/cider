@@ -17,11 +17,25 @@ func New() *handler {
 }
 
 func (h *handler) Handle(args []string) error {
-	if len(args) != 2 {
-		return fmt.Errorf("command expects exactly 2 arguments")
+	if len(args) < 2 {
+		return fmt.Errorf("command expects at least 2 arguments")
 	}
 
-	fmt.Println(isInRange(args[0], args[1]))
+	found := false
+	ip := args[0]
+	for _, cidr := range args[1:] {
+		inRange := isInRange(ip, cidr)
+
+		found = found || inRange
+
+		if inRange {
+			fmt.Println(cidr)
+		}
+	}
+
+	if !found {
+		fmt.Printf("%s is not in any of the provided ranges\n", ip)
+	}
 
 	return nil
 }

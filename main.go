@@ -25,6 +25,7 @@ func main() {
 
 					return handler.Handle(arg)
 				},
+				UsageText: "ranges [optional range]",
 			},
 			{
 				Name:    "in",
@@ -37,6 +38,7 @@ func main() {
 
 					return handler.Handle(args)
 				},
+				UsageText: "in [ip] [range1] [optional range2] [optional rangeN]",
 			},
 		},
 	}
