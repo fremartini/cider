@@ -93,9 +93,18 @@ func calculateNumAddresses(addressLength, prefixLength int) uint {
 func printCIDRBlocks(blocks []*CIDRBlock) error {
 	w := tabwriter.NewWriter(os.Stdout, 2, 4, 1, ' ', 0)
 
-	fmt.Fprint(w, "CIDR\tSubnet Mask\tAddresses\n")
+	fmt.Fprint(w, "CIDR\tSubnet Mask\tAddresses\tAzure Addresses\n")
 	for _, block := range blocks {
-		fmt.Fprintf(w, "/%v\t%s\t%v\n", block.NetworkPortion, block.SubnetMask, block.AvailableHosts)
+
+		availableAzureAddresses := "N/A"
+
+		// Azure reserves the first four addresses and the last address, for a total of five IP addresses within each subnet
+		// https://learn.microsoft.com/en-us/azure/virtual-network/virtual-networks-faq#are-there-any-restrictions-on-using-ip-addresses-within-these-subnets
+		if block.AvailableHosts >= 5 {
+			availableAzureAddresses = fmt.Sprintf("%v", block.AvailableHosts-5)
+		}
+
+		fmt.Fprintf(w, "/%v\t%s\t%v\t%s\n", block.NetworkPortion, block.SubnetMask, block.AvailableHosts, availableAzureAddresses)
 	}
 
 	return w.Flush()
