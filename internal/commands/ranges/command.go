@@ -1,11 +1,10 @@
 package ranges
 
 import (
+	"cider/internal/cidr"
 	"fmt"
-	"math"
 	"os"
 	"strconv"
-	"strings"
 	"text/tabwriter"
 )
 
@@ -28,27 +27,27 @@ func (*handler) Handle(arg string) error {
 	}
 
 	// argument was given - try to parse it
-	cidr, err := strconv.ParseInt(arg, 10, INT_SIZE)
+	hostPortion, err := strconv.ParseInt(arg, 10, INT_SIZE)
 
 	if err != nil {
 		return fmt.Errorf("%s is not a valid integer", arg)
 	}
 
-	if cidr < 0 || cidr > INT_SIZE {
-		return fmt.Errorf("%v is not a valid size - must be between 0 and 32", cidr)
+	if hostPortion < 0 || hostPortion > INT_SIZE {
+		return fmt.Errorf("%v is not a valid size - must be between 0 and 32", hostPortion)
 	}
 
-	block := calculateCIDRBlock(int(cidr))
+	block := calculateCIDRBlock(int(hostPortion))
 
-	table := []*CIDRBlock{block}
+	table := []*cidr.CIDRBlock{block}
 
 	return printCIDRBlocks(table)
 }
 
-func calculateAllCIDRBlocks() []*CIDRBlock {
-	blocks := []*CIDRBlock{}
-	for cidr := 0; cidr < INT_SIZE+1; cidr++ {
-		block := calculateCIDRBlock(cidr)
+func calculateAllCIDRBlocks() []*cidr.CIDRBlock {
+	blocks := []*cidr.CIDRBlock{}
+	for i := 0; i < INT_SIZE+1; i++ {
+		block := calculateCIDRBlock(i)
 
 		blocks = append(blocks, block)
 	}
@@ -56,41 +55,11 @@ func calculateAllCIDRBlocks() []*CIDRBlock {
 	return blocks
 }
 
-func calculateCIDRBlock(cidr int) *CIDRBlock {
-	numAddresses := calculateNumAddresses(INT_SIZE, cidr)
-	mask := calculateSubnetMask(cidr)
-
-	block := &CIDRBlock{
-		NetworkPortion: uint(cidr),
-		SubnetMask:     mask,
-		AvailableHosts: numAddresses,
-	}
-
-	return block
+func calculateCIDRBlock(hostPortion int) *cidr.CIDRBlock {
+	return cidr.NewBlock(fmt.Sprintf("10.0.0.0/%v", hostPortion))
 }
 
-func calculateSubnetMask(cidr int) string {
-	ones := strings.Repeat("1", cidr)
-	zeroes := strings.Repeat("0", INT_SIZE-cidr)
-
-	mask := ones + zeroes
-
-	base := 2
-	octet1 := must(strconv.ParseInt(mask[0:8], base, INT_SIZE))
-	octet2 := must(strconv.ParseInt(mask[8:16], base, INT_SIZE))
-	octet3 := must(strconv.ParseInt(mask[16:24], base, INT_SIZE))
-	octet4 := must(strconv.ParseInt(mask[24:32], base, INT_SIZE))
-
-	return fmt.Sprintf("%v.%v.%v.%v", octet1, octet2, octet3, octet4)
-}
-
-func calculateNumAddresses(addressLength, prefixLength int) uint {
-	numAddresses := math.Pow(2, float64(addressLength)-float64(prefixLength))
-
-	return uint(numAddresses)
-}
-
-func printCIDRBlocks(blocks []*CIDRBlock) error {
+func printCIDRBlocks(blocks []*cidr.CIDRBlock) error {
 	w := tabwriter.NewWriter(os.Stdout, 2, 4, 1, ' ', 0)
 
 	fmt.Fprint(w, "CIDR\tSubnet Mask\tAddresses\tAzure Addresses\n")
@@ -100,20 +69,12 @@ func printCIDRBlocks(blocks []*CIDRBlock) error {
 
 		// Azure reserves the first four addresses and the last address, for a total of five IP addresses within each subnet
 		// https://learn.microsoft.com/en-us/azure/virtual-network/virtual-networks-faq#are-there-any-restrictions-on-using-ip-addresses-within-these-subnets
-		if block.AvailableHosts >= 5 {
-			availableAzureAddresses = fmt.Sprintf("%v", block.AvailableHosts-5)
+		if block.AvailableHosts() >= 5 {
+			availableAzureAddresses = fmt.Sprintf("%v", block.AvailableHosts()-5)
 		}
 
-		fmt.Fprintf(w, "/%v\t%s\t%v\t%s\n", block.NetworkPortion, block.SubnetMask, block.AvailableHosts, availableAzureAddresses)
+		fmt.Fprintf(w, "/%v\t%s\t%v\t%s\n", block.HostPortion, block.SubnetMask(), block.AvailableHosts(), availableAzureAddresses)
 	}
 
 	return w.Flush()
-}
-
-func must[T any](x T, e error) T {
-	if e != nil {
-		panic(e)
-	}
-
-	return x
 }
