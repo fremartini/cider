@@ -3,6 +3,7 @@ package cidr
 import (
 	"cider/internal/list"
 	"cider/internal/utils"
+	"errors"
 	"fmt"
 	"math"
 	"slices"
@@ -31,17 +32,26 @@ func NewBlock(network string) *CIDRBlock {
 	}
 }
 
-func (b *CIDRBlock) Subnet(sizes []int) []string {
-	//lastAddress := b.BroadcastAddress()
+func (b *CIDRBlock) Subnet(sizes []int) ([]string, error) {
 
+	// sort subnets largest to smallest to prevent fragmentation
 	slices.Sort(sizes)
 
+	next := b
 	subnets := []string{}
 	for _, size := range sizes {
-		subnets = append(subnets, fmt.Sprintf("%s/%v", b.Network, size))
+		subnetBlock := NewBlock(fmt.Sprintf("%s/%v", next.Network, size))
+
+		if !b.Contains(subnetBlock.Network) {
+			return nil, errors.New("error occured during subnetting")
+		}
+
+		subnets = append(subnets, fmt.Sprintf("%s/%v", subnetBlock.Network, subnetBlock.HostPortion))
+
+		next = NewBlock(fmt.Sprintf("%s/%v", subnetBlock.StartAddressOfNextBlock(), size))
 	}
 
-	return subnets
+	return subnets, nil
 }
 
 // https://stackoverflow.com/questions/9622967/how-to-see-if-an-ip-address-belongs-inside-of-a-range-of-ips-using-cidr-notation

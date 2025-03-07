@@ -225,14 +225,15 @@ func Test_Subnet(t *testing.T) {
 		sizes    []int
 		expected []string
 	}{
-		"/17": {input: cidr.NewBlock("10.0.0.0/16"), sizes: []int{17, 17}, expected: []string{"10.0.0.0/17", "10.0.128.0/17"}},
+		"two even subnets": {input: cidr.NewBlock("10.0.0.0/16"), sizes: []int{17, 17}, expected: []string{"10.0.0.0/17", "10.0.128.0/17"}},
+		"three subnets":    {input: cidr.NewBlock("10.0.0.0/16"), sizes: []int{18, 17, 18}, expected: []string{"10.0.0.0/17", "10.0.128.0/18", "10.0.192.0/18"}},
 	}
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			actual := test.input.Subnet(test.sizes)
+			actual, _ := test.input.Subnet(test.sizes)
 
 			if !reflect.DeepEqual(actual, test.expected) {
 				t.Fatalf("%s returns correct subnet: got %v expected %v", name, actual, test.expected)

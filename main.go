@@ -62,7 +62,7 @@ func main() {
 			},
 			{
 				Name:    "info",
-				Usage:   "display information about an ip or range",
+				Usage:   "display information about a range",
 				Aliases: []string{"f"},
 				Action: func(_ context.Context, command *cli.Command) error {
 					args := command.Args().Slice()
@@ -71,7 +71,7 @@ func main() {
 
 					return handler.Handle(args)
 				},
-				UsageText: "info [range or ip]",
+				UsageText: "info [range]",
 			},
 			{
 				Name:        "version",
