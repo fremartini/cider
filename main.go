@@ -2,6 +2,7 @@ package main
 
 import (
 	"cider/internal/commands/in"
+	"cider/internal/commands/info"
 	"cider/internal/commands/ranges"
 	"cider/internal/commands/subnet"
 	"context"
@@ -58,6 +59,19 @@ func main() {
 					return handler.Handle(args)
 				},
 				UsageText: "subnet [range] [size1] [optional size2] [optional sizeN]",
+			},
+			{
+				Name:    "info",
+				Usage:   "display information about an ip or range",
+				Aliases: []string{"f"},
+				Action: func(_ context.Context, command *cli.Command) error {
+					args := command.Args().Slice()
+
+					handler := info.New()
+
+					return handler.Handle(args)
+				},
+				UsageText: "info [range or ip]",
 			},
 			{
 				Name:        "version",

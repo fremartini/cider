@@ -2,6 +2,7 @@ package cidr_test
 
 import (
 	"cider/internal/cidr"
+	"reflect"
 	"testing"
 )
 
@@ -190,6 +191,51 @@ func Test_StartAddressOfNextBlock(t *testing.T) {
 
 			if actual != test.expected {
 				t.Fatalf("%s returns next block address: got %v expected %v", name, actual, test.expected)
+			}
+		})
+	}
+}
+
+func Test_Contains(t *testing.T) {
+	tests := map[string]struct {
+		ip       string
+		ipRange  *cidr.CIDRBlock
+		expected bool
+	}{
+		"ip inside range":  {ip: "10.50.30.7", ipRange: cidr.NewBlock("10.0.0.0/8"), expected: true},
+		"ip outside range": {ip: "10.50.30.7", ipRange: cidr.NewBlock("10.0.0.0/28"), expected: false},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			actual := test.ipRange.Contains(test.ip)
+
+			if actual != test.expected {
+				t.Fatalf("%s: got %v expected %v", name, actual, test.expected)
+			}
+		})
+	}
+}
+
+func Test_Subnet(t *testing.T) {
+	tests := map[string]struct {
+		input    *cidr.CIDRBlock
+		sizes    []int
+		expected []string
+	}{
+		"/17": {input: cidr.NewBlock("10.0.0.0/16"), sizes: []int{17, 17}, expected: []string{"10.0.0.0/17", "10.0.128.0/17"}},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			actual := test.input.Subnet(test.sizes)
+
+			if !reflect.DeepEqual(actual, test.expected) {
+				t.Fatalf("%s returns correct subnet: got %v expected %v", name, actual, test.expected)
 			}
 		})
 	}

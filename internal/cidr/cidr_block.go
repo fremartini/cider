@@ -2,8 +2,10 @@ package cidr
 
 import (
 	"cider/internal/list"
+	"cider/internal/utils"
 	"fmt"
 	"math"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -29,14 +31,39 @@ func NewBlock(network string) *CIDRBlock {
 	}
 }
 
-func padLeft(s string, paddingChar rune, totalWidth int) string {
-	if len(s) >= totalWidth {
-		return s
+func (b *CIDRBlock) Subnet(sizes []int) []string {
+	//lastAddress := b.BroadcastAddress()
+
+	slices.Sort(sizes)
+
+	subnets := []string{}
+	for _, size := range sizes {
+		subnets = append(subnets, fmt.Sprintf("%s/%v", b.Network, size))
 	}
 
-	padding := totalWidth - len(s)
+	return subnets
+}
 
-	return strings.Repeat(string(paddingChar), padding) + s
+// https://stackoverflow.com/questions/9622967/how-to-see-if-an-ip-address-belongs-inside-of-a-range-of-ips-using-cidr-notation
+func (b *CIDRBlock) Contains(ip string) bool {
+	IP_addr := ipToDecimal(ip)
+	CIDR_addr := ipToDecimal(b.Network)
+	CIDR_mask := -1 << (INT_SIZE - b.HostPortion)
+
+	return (IP_addr & CIDR_mask) == (CIDR_addr & CIDR_mask)
+}
+
+// http://www.aboutmyip.com/AboutMyXApp/IP2Integer.jsp
+func ipToDecimal(ip string) int {
+	parts := strings.Split(ip, ".")
+
+	base := 10
+	octet1 := must(strconv.ParseInt(parts[0], base, INT_SIZE))
+	octet2 := must(strconv.ParseInt(parts[1], base, INT_SIZE))
+	octet3 := must(strconv.ParseInt(parts[2], base, INT_SIZE))
+	octet4 := must(strconv.ParseInt(parts[3], base, INT_SIZE))
+
+	return int((octet1 * 16777216) + (octet2 * 65536) + (octet3 * 256) + octet4)
 }
 
 func (b *CIDRBlock) NetworkPortionBinary() string {
@@ -49,7 +76,7 @@ func (b *CIDRBlock) NetworkPortionBinary() string {
 func toBin(s string) string {
 	asInt := must(strconv.ParseInt(s, 10, INT_SIZE))
 	asBinaryString := strconv.FormatInt(asInt, 2)
-	paddedBynaryString := padLeft(asBinaryString, '0', 8)
+	paddedBynaryString := utils.PadLeft(asBinaryString, '0', 8)
 	return paddedBynaryString
 }
 
@@ -82,7 +109,7 @@ func (b *CIDRBlock) StartAddressOfNextBlock() string {
 	next := must(strconv.ParseInt(binStr, 2, INT_SIZE)) + 1
 
 	asBinaryString := strconv.FormatInt(next, 2)
-	asBinaryString = padLeft(asBinaryString, '0', 32)
+	asBinaryString = utils.PadLeft(asBinaryString, '0', 32)
 
 	base := 2
 	octet1 := must(strconv.ParseInt(asBinaryString[0:8], base, INT_SIZE))

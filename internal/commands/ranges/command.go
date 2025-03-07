@@ -62,7 +62,7 @@ func calculateCIDRBlock(hostPortion int) *cidr.CIDRBlock {
 func printCIDRBlocks(blocks []*cidr.CIDRBlock) error {
 	w := tabwriter.NewWriter(os.Stdout, 2, 4, 1, ' ', 0)
 
-	fmt.Fprint(w, "CIDR\tSubnet Mask\tAddresses\tAzure Addresses\n")
+	fmt.Fprint(w, "Cidr\tSubnet mask\tAddresses\tAzure addresses\n")
 	for _, block := range blocks {
 
 		availableAzureAddresses := "N/A"
