@@ -109,6 +109,16 @@ func (b *CIDRBlock) AvailableHosts() uint {
 	return uint(numAddresses)
 }
 
+func (b *CIDRBlock) AvailableAzureHosts() string {
+	// Azure reserves the first four addresses and the last address, for a total of five IP addresses within each subnet
+	// https://learn.microsoft.com/en-us/azure/virtual-network/virtual-networks-faq#are-there-any-restrictions-on-using-ip-addresses-within-these-subnets
+	if b.AvailableHosts() >= 5 {
+		return fmt.Sprintf("%v", b.AvailableHosts()-5)
+	}
+
+	return "N/A"
+}
+
 func (b *CIDRBlock) StartAddressOfNextBlock() string {
 	octets := strings.Split(b.BroadcastAddress(), ".")
 	octets = list.Map(octets, toBin)

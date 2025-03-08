@@ -64,16 +64,7 @@ func printCIDRBlocks(blocks []*cidr.CIDRBlock) error {
 
 	fmt.Fprint(w, "Cidr\tSubnet mask\tAddresses\tAzure addresses\n")
 	for _, block := range blocks {
-
-		availableAzureAddresses := "N/A"
-
-		// Azure reserves the first four addresses and the last address, for a total of five IP addresses within each subnet
-		// https://learn.microsoft.com/en-us/azure/virtual-network/virtual-networks-faq#are-there-any-restrictions-on-using-ip-addresses-within-these-subnets
-		if block.AvailableHosts() >= 5 {
-			availableAzureAddresses = fmt.Sprintf("%v", block.AvailableHosts()-5)
-		}
-
-		fmt.Fprintf(w, "/%v\t%s\t%v\t%s\n", block.HostPortion, block.SubnetMask(), block.AvailableHosts(), availableAzureAddresses)
+		fmt.Fprintf(w, "/%v\t%s\t%v\t%s\n", block.HostPortion, block.SubnetMask(), block.AvailableHosts(), block.AvailableAzureHosts())
 	}
 
 	return w.Flush()
