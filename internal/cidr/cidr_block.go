@@ -3,7 +3,6 @@ package cidr
 import (
 	"cider/internal/list"
 	"cider/internal/utils"
-	"errors"
 	"fmt"
 	"math"
 	"slices"
@@ -33,7 +32,6 @@ func NewBlock(network string) *CIDRBlock {
 }
 
 func (b *CIDRBlock) Subnet(sizes []int) ([]string, error) {
-
 	// sort subnets largest to smallest to prevent fragmentation
 	slices.Sort(sizes)
 
@@ -43,7 +41,7 @@ func (b *CIDRBlock) Subnet(sizes []int) ([]string, error) {
 		subnetBlock := NewBlock(fmt.Sprintf("%s/%v", next.Network, size))
 
 		if !b.Contains(subnetBlock.Network) {
-			return nil, errors.New("error occured during subnetting")
+			return nil, fmt.Errorf("invalid configuration: subnet %s/%v is outside provided network range %s/%v", next.Network, size, b.Network, b.HostPortion)
 		}
 
 		subnets = append(subnets, fmt.Sprintf("%s/%v", subnetBlock.Network, subnetBlock.HostPortion))
