@@ -19,11 +19,11 @@ var version string
 func main() {
 	cmd := &cli.Command{
 		Name:  "cider",
-		Usage: "CIDR cli tool",
+		Usage: "cli tool to help with common IP related tasks",
 		Commands: []*cli.Command{
 			{
 				Name:    "ranges",
-				Usage:   "display all CIDR ranges",
+				Usage:   "Display all CIDR ranges",
 				Aliases: []string{"r"},
 				Action: func(_ context.Context, command *cli.Command) error {
 					arg := command.Args().First()
@@ -36,7 +36,7 @@ func main() {
 			},
 			{
 				Name:    "in",
-				Usage:   "determine if an ip falls within a range",
+				Usage:   "Determine if an ip falls within a range",
 				Aliases: []string{"i"},
 				Action: func(_ context.Context, command *cli.Command) error {
 					args := command.Args().Slice()
@@ -49,7 +49,7 @@ func main() {
 			},
 			{
 				Name:    "subnet",
-				Usage:   "split a range into multiple smaller ranges",
+				Usage:   "Split a range into multiple smaller ranges",
 				Aliases: []string{"s"},
 				Action: func(_ context.Context, command *cli.Command) error {
 					args := command.Args().Slice()
@@ -62,7 +62,7 @@ func main() {
 			},
 			{
 				Name:    "info",
-				Usage:   "display information about a range",
+				Usage:   "Display information about a range",
 				Aliases: []string{"f"},
 				Action: func(_ context.Context, command *cli.Command) error {
 					args := command.Args().Slice()
@@ -74,9 +74,9 @@ func main() {
 				UsageText: "info [range]",
 			},
 			{
-				Name:        "version",
-				Aliases:     []string{"v"},
-				Description: "show version",
+				Name:    "version",
+				Aliases: []string{"v"},
+				Usage:   "Show version",
 				Action: func(_ context.Context, command *cli.Command) error {
 					fmt.Println(version)
 
