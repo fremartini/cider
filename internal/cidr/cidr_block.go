@@ -94,13 +94,9 @@ func (b *CIDRBlock) SubnetMask() string {
 
 	mask := ones + zeroes
 
-	base := 2
-	octet1 := must(strconv.ParseInt(mask[0:8], base, INT_SIZE))
-	octet2 := must(strconv.ParseInt(mask[8:16], base, INT_SIZE))
-	octet3 := must(strconv.ParseInt(mask[16:24], base, INT_SIZE))
-	octet4 := must(strconv.ParseInt(mask[24:32], base, INT_SIZE))
+	octets := stringToOctets(mask)
 
-	return fmt.Sprintf("%v.%v.%v.%v", octet1, octet2, octet3, octet4)
+	return fmt.Sprintf("%v.%v.%v.%v", octets[0], octets[1], octets[2], octets[3])
 }
 
 func (b *CIDRBlock) AvailableHosts() uint {
@@ -129,13 +125,9 @@ func (b *CIDRBlock) StartAddressOfNextBlock() string {
 	asBinaryString := strconv.FormatInt(next, 2)
 	asBinaryString = utils.PadLeft(asBinaryString, '0', 32)
 
-	base := 2
-	octet1 := must(strconv.ParseInt(asBinaryString[0:8], base, INT_SIZE))
-	octet2 := must(strconv.ParseInt(asBinaryString[8:16], base, INT_SIZE))
-	octet3 := must(strconv.ParseInt(asBinaryString[16:24], base, INT_SIZE))
-	octet4 := must(strconv.ParseInt(asBinaryString[24:32], base, INT_SIZE))
+	octetsInt := stringToOctets(asBinaryString)
 
-	return fmt.Sprintf("%v.%v.%v.%v", octet1, octet2, octet3, octet4)
+	return fmt.Sprintf("%v.%v.%v.%v", octetsInt[0], octetsInt[1], octetsInt[2], octetsInt[3])
 }
 
 func (b *CIDRBlock) NetworkAddress() string {
@@ -143,29 +135,32 @@ func (b *CIDRBlock) NetworkAddress() string {
 
 	broadcast := ipBin + strings.Repeat("0", INT_SIZE-b.HostPortion)
 
-	base := 2
-	octet1 := must(strconv.ParseInt(broadcast[0:8], base, INT_SIZE))
-	octet2 := must(strconv.ParseInt(broadcast[8:16], base, INT_SIZE))
-	octet3 := must(strconv.ParseInt(broadcast[16:24], base, INT_SIZE))
-	octet4 := must(strconv.ParseInt(broadcast[24:32], base, INT_SIZE))
+	octets := stringToOctets(broadcast)
 
-	return fmt.Sprintf("%v.%v.%v.%v", octet1, octet2, octet3, octet4)
+	return fmt.Sprintf("%v.%v.%v.%v", octets[0], octets[1], octets[2], octets[3])
 }
 
 func (b *CIDRBlock) BroadcastAddress() string {
 	// https://stackoverflow.com/questions/1470792/how-to-calculate-the-ip-range-when-the-ip-address-and-the-netmask-is-given
-
 	ipBin := strings.ReplaceAll(b.NetworkPortionBinary(), ".", "")[0:b.HostPortion]
 
 	broadcast := ipBin + strings.Repeat("1", INT_SIZE-b.HostPortion)
 
-	base := 2
-	octet1 := must(strconv.ParseInt(broadcast[0:8], base, INT_SIZE))
-	octet2 := must(strconv.ParseInt(broadcast[8:16], base, INT_SIZE))
-	octet3 := must(strconv.ParseInt(broadcast[16:24], base, INT_SIZE))
-	octet4 := must(strconv.ParseInt(broadcast[24:32], base, INT_SIZE))
+	octets := stringToOctets(broadcast)
 
-	return fmt.Sprintf("%v.%v.%v.%v", octet1, octet2, octet3, octet4)
+	return fmt.Sprintf("%v.%v.%v.%v", octets[0], octets[1], octets[2], octets[3])
+}
+
+func stringToOctets(ipString string) []int64 {
+	octets := make([]int64, 4)
+
+	base := 2
+	octets[0] = must(strconv.ParseInt(ipString[0:8], base, INT_SIZE))
+	octets[1] = must(strconv.ParseInt(ipString[8:16], base, INT_SIZE))
+	octets[2] = must(strconv.ParseInt(ipString[16:24], base, INT_SIZE))
+	octets[3] = must(strconv.ParseInt(ipString[24:32], base, INT_SIZE))
+
+	return octets
 }
 
 func must[T any](x T, e error) T {
