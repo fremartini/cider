@@ -1,13 +1,9 @@
 package in
 
 import (
+	"cider/internal/cidr"
+	"cider/internal/list"
 	"fmt"
-	"strconv"
-	"strings"
-)
-
-const (
-	INT_SIZE = 32
 )
 
 type handler struct{}
@@ -21,54 +17,23 @@ func (h *handler) Handle(args []string) error {
 		return fmt.Errorf("command expects at least 2 arguments")
 	}
 
-	found := false
 	ip := args[0]
-	for _, cidr := range args[1:] {
-		inRange := isInRange(ip, cidr)
+	ranges := list.Map(args[1:], func(i string) *cidr.CIDRBlock {
+		return cidr.NewBlock(i)
+	})
 
-		found = found || inRange
+	inRange := list.Filter(ranges, func(cidr *cidr.CIDRBlock) bool {
+		return cidr.Contains(ip)
+	})
 
-		if inRange {
-			fmt.Println(cidr)
-		}
+	if len(inRange) == 0 {
+		fmt.Printf("%s is not in any of the provided ranges\n", ip)
+		return nil
 	}
 
-	if !found {
-		fmt.Printf("%s is not in any of the provided ranges\n", ip)
+	for _, ip := range inRange {
+		fmt.Println(ip)
 	}
 
 	return nil
-}
-
-// https://stackoverflow.com/questions/9622967/how-to-see-if-an-ip-address-belongs-inside-of-a-range-of-ips-using-cidr-notation
-func isInRange(ipAddress, CIDRmask string) bool {
-
-	parts := strings.Split(CIDRmask, "/")
-
-	IP_addr := ipToDecimal(ipAddress)
-	CIDR_addr := ipToDecimal(parts[0])
-	CIDR_mask := -1 << (INT_SIZE - must(strconv.ParseInt(parts[1], 10, INT_SIZE)))
-
-	return (IP_addr & CIDR_mask) == (CIDR_addr & CIDR_mask)
-}
-
-// http://www.aboutmyip.com/AboutMyXApp/IP2Integer.jsp
-func ipToDecimal(ip string) int {
-	parts := strings.Split(ip, ".")
-
-	base := 10
-	octet1 := must(strconv.ParseInt(parts[0], base, INT_SIZE))
-	octet2 := must(strconv.ParseInt(parts[1], base, INT_SIZE))
-	octet3 := must(strconv.ParseInt(parts[2], base, INT_SIZE))
-	octet4 := must(strconv.ParseInt(parts[3], base, INT_SIZE))
-
-	return int((octet1 * 16777216) + (octet2 * 65536) + (octet3 * 256) + octet4)
-}
-
-func must[T any](x T, e error) T {
-	if e != nil {
-		panic(e)
-	}
-
-	return x
 }

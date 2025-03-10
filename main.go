@@ -2,25 +2,31 @@ package main
 
 import (
 	"cider/internal/commands/in"
+	"cider/internal/commands/info"
 	"cider/internal/commands/ranges"
+	"cider/internal/commands/subnet"
+	"context"
+	"fmt"
 	"log"
 	"os"
 	"strconv"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
+var version string
+
 func main() {
-	app := &cli.App{
+	cmd := &cli.Command{
 		Name:  "cider",
 		Usage: "CIDR cli tool",
 		Commands: []*cli.Command{
 			{
 				Name:    "ranges",
-				Usage:   "Displays all CIDR ranges",
+				Usage:   "display all CIDR ranges",
 				Aliases: []string{"r"},
-				Action: func(c *cli.Context) error {
-					arg := c.Args().First()
+				Action: func(_ context.Context, command *cli.Command) error {
+					arg := command.Args().First()
 
 					handler := ranges.New()
 
@@ -30,16 +36,52 @@ func main() {
 			},
 			{
 				Name:    "in",
-				Usage:   "Determines if an ip falls within a range",
+				Usage:   "determine if an ip falls within a range",
 				Aliases: []string{"i"},
-				Action: func(c *cli.Context) error {
-					args := c.Args().Slice()
+				Action: func(_ context.Context, command *cli.Command) error {
+					args := command.Args().Slice()
 
 					handler := in.New()
 
 					return handler.Handle(args)
 				},
 				UsageText: "in [ip] [range1] [optional range2] [optional rangeN]",
+			},
+			{
+				Name:    "subnet",
+				Usage:   "split a range into multiple smaller ranges",
+				Aliases: []string{"s"},
+				Action: func(_ context.Context, command *cli.Command) error {
+					args := command.Args().Slice()
+
+					handler := subnet.New()
+
+					return handler.Handle(args)
+				},
+				UsageText: "subnet [range] [size1] [optional size2] [optional sizeN]",
+			},
+			{
+				Name:    "info",
+				Usage:   "display information about a range",
+				Aliases: []string{"f"},
+				Action: func(_ context.Context, command *cli.Command) error {
+					args := command.Args().Slice()
+
+					handler := info.New()
+
+					return handler.Handle(args)
+				},
+				UsageText: "info [range]",
+			},
+			{
+				Name:        "version",
+				Aliases:     []string{"v"},
+				Description: "show version",
+				Action: func(_ context.Context, command *cli.Command) error {
+					fmt.Println(version)
+
+					return nil
+				},
 			},
 		},
 	}
@@ -55,7 +97,7 @@ func main() {
 		}
 	}
 
-	if err := app.Run(args); err != nil {
+	if err := cmd.Run(context.Background(), args); err != nil {
 		log.Fatal(err)
 	}
 }
