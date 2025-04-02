@@ -21,12 +21,12 @@ func New() *handler {
 func (*handler) Handle(arg string) error {
 	// no args
 	if arg == "" {
-		table := calculateAllCIDRBlocks()
+		table := calculateAllCidrBlocks()
 
-		return printCIDRBlocks(table)
+		return printCidrBlocks(table)
 	}
 
-	// argument was given - try to parse it
+	// argument was given. Try to parse it
 	hostPortion, err := strconv.ParseInt(arg, 10, INT_SIZE)
 
 	if err != nil {
@@ -34,20 +34,20 @@ func (*handler) Handle(arg string) error {
 	}
 
 	if hostPortion < 0 || hostPortion > INT_SIZE {
-		return fmt.Errorf("%v is not a valid size - must be between 0 and 32", hostPortion)
+		return fmt.Errorf("%v is not a valid size - must be between 0 and %d", hostPortion, INT_SIZE)
 	}
 
-	block := calculateCIDRBlock(int(hostPortion))
+	block := defaultCidrBlockFromHostPortion(int(hostPortion))
 
-	table := []*cidr.CIDRBlock{block}
+	blocks := []*cidr.CIDRBlock{block}
 
-	return printCIDRBlocks(table)
+	return printCidrBlocks(blocks)
 }
 
-func calculateAllCIDRBlocks() []*cidr.CIDRBlock {
+func calculateAllCidrBlocks() []*cidr.CIDRBlock {
 	blocks := []*cidr.CIDRBlock{}
-	for i := 0; i < INT_SIZE+1; i++ {
-		block := calculateCIDRBlock(i)
+	for i := range INT_SIZE + 1 {
+		block := defaultCidrBlockFromHostPortion(i)
 
 		blocks = append(blocks, block)
 	}
@@ -55,11 +55,11 @@ func calculateAllCIDRBlocks() []*cidr.CIDRBlock {
 	return blocks
 }
 
-func calculateCIDRBlock(hostPortion int) *cidr.CIDRBlock {
+func defaultCidrBlockFromHostPortion(hostPortion int) *cidr.CIDRBlock {
 	return cidr.NewBlock(fmt.Sprintf("10.0.0.0/%v", hostPortion))
 }
 
-func printCIDRBlocks(blocks []*cidr.CIDRBlock) error {
+func printCidrBlocks(blocks []*cidr.CIDRBlock) error {
 	w := tabwriter.NewWriter(os.Stdout, 2, 4, 1, ' ', 0)
 
 	fmt.Fprint(w, "Cidr\tSubnet mask\tAddresses\tAzure addresses\n")

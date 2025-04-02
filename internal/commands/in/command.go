@@ -18,6 +18,7 @@ func (h *handler) Handle(args []string) error {
 	}
 
 	ip := args[0]
+
 	ranges := list.Map(args[1:], func(i string) *cidr.CIDRBlock {
 		return cidr.NewBlock(i)
 	})

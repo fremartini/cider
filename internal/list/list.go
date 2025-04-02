@@ -30,7 +30,12 @@ func FlatMap[T, K any](v []T, f func(T) []K) []K {
 }
 
 func Contains[T any](v []T, f func(T) bool) bool {
-	return len(Filter(v, f)) > 0
+	for _, i := range v {
+		if f(i) {
+			return true
+		}
+	}
+	return false
 }
 
 func All[T any](v []T, f func(T) bool) bool {
