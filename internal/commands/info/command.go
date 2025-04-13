@@ -15,7 +15,7 @@ func New() *handler {
 }
 
 type pair struct {
-	a, b string
+	item1, item2 string
 }
 
 func (h *handler) Handle(args []string) error {
@@ -28,12 +28,11 @@ func (h *handler) Handle(args []string) error {
 	block := cidr.NewBlock(ip)
 
 	entries := []pair{
-		{a: "Address range", b: fmt.Sprintf("%s - %s", block.NetworkAddress(), block.BroadcastAddress())},
-		{a: "Start of next block", b: block.StartAddressOfNextBlock()},
-		{a: "Cidr", b: fmt.Sprintf("/%v", block.HostPortion)},
-		{a: "Subnet mask", b: block.SubnetMask()},
-		{a: "Addresses", b: fmt.Sprintf("%v", block.AvailableHosts())},
-		{a: "Azure addresses", b: block.AvailableAzureHosts()},
+		{item1: "Address range", item2: fmt.Sprintf("%s - %s", block.NetworkAddress(), block.BroadcastAddress())},
+		{item1: "Start of next block", item2: block.StartAddressOfNextBlock()},
+		{item1: "Mask", item2: fmt.Sprintf("%s (%s)", fmt.Sprintf("/%v", block.HostPortion), block.SubnetMask())},
+		{item1: "Addresses", item2: fmt.Sprintf("%v", block.AvailableHosts())},
+		{item1: "Azure addresses", item2: block.AvailableAzureHosts()},
 	}
 
 	printOutput(entries)
@@ -44,7 +43,7 @@ func (h *handler) Handle(args []string) error {
 func printOutput(entries []pair) {
 	keys := []string{}
 	for _, pair := range entries {
-		keys = append(keys, pair.a)
+		keys = append(keys, pair.item1)
 	}
 
 	longestTitle := list.Fold(keys, 0, func(title string, acc int) int {
@@ -52,6 +51,6 @@ func printOutput(entries []pair) {
 	})
 
 	for _, pair := range entries {
-		fmt.Printf("%s : %v\n", utils.PadRight(pair.a, ' ', longestTitle), pair.b)
+		fmt.Printf("%s : %v\n", utils.PadRight(pair.item1, ' ', longestTitle), pair.item2)
 	}
 }

@@ -66,10 +66,10 @@ func ipToDecimal(ip string) int {
 	parts := strings.Split(ip, ".")
 
 	base := 10
-	octet1 := must(strconv.ParseInt(parts[0], base, INT_SIZE))
-	octet2 := must(strconv.ParseInt(parts[1], base, INT_SIZE))
-	octet3 := must(strconv.ParseInt(parts[2], base, INT_SIZE))
-	octet4 := must(strconv.ParseInt(parts[3], base, INT_SIZE))
+	octet1 := must(strconv.ParseUint(parts[0], base, INT_SIZE))
+	octet2 := must(strconv.ParseUint(parts[1], base, INT_SIZE))
+	octet3 := must(strconv.ParseUint(parts[2], base, INT_SIZE))
+	octet4 := must(strconv.ParseUint(parts[3], base, INT_SIZE))
 
 	return int((octet1 * 16777216) + (octet2 * 65536) + (octet3 * 256) + octet4)
 }
@@ -82,8 +82,8 @@ func (b *CIDRBlock) NetworkPortionBinary() string {
 }
 
 func toBin(s string) string {
-	asInt := must(strconv.ParseInt(s, 10, INT_SIZE))
-	asBinaryString := strconv.FormatInt(asInt, 2)
+	asInt := must(strconv.ParseUint(s, 10, INT_SIZE))
+	asBinaryString := strconv.FormatUint(asInt, 2)
 	paddedBynaryString := utils.PadLeft(asBinaryString, '0', 8)
 	return paddedBynaryString
 }
@@ -120,9 +120,9 @@ func (b *CIDRBlock) StartAddressOfNextBlock() string {
 	octets = list.Map(octets, toBin)
 	binStr := strings.Join(octets, "")
 
-	next := must(strconv.ParseInt(binStr, 2, INT_SIZE)) + 1
+	next := must(strconv.ParseUint(binStr, 2, INT_SIZE)) + 1
 
-	asBinaryString := strconv.FormatInt(next, 2)
+	asBinaryString := strconv.FormatUint(next, 2)
 	asBinaryString = utils.PadLeft(asBinaryString, '0', 32)
 
 	octetsInt := stringToOctets(asBinaryString)
@@ -151,14 +151,14 @@ func (b *CIDRBlock) BroadcastAddress() string {
 	return fmt.Sprintf("%v.%v.%v.%v", octets[0], octets[1], octets[2], octets[3])
 }
 
-func stringToOctets(ipString string) []int64 {
-	octets := make([]int64, 4)
+func stringToOctets(ipString string) []uint64 {
+	octets := make([]uint64, 4)
 
 	base := 2
-	octets[0] = must(strconv.ParseInt(ipString[0:8], base, INT_SIZE))
-	octets[1] = must(strconv.ParseInt(ipString[8:16], base, INT_SIZE))
-	octets[2] = must(strconv.ParseInt(ipString[16:24], base, INT_SIZE))
-	octets[3] = must(strconv.ParseInt(ipString[24:32], base, INT_SIZE))
+	octets[0] = must(strconv.ParseUint(ipString[0:8], base, INT_SIZE))
+	octets[1] = must(strconv.ParseUint(ipString[8:16], base, INT_SIZE))
+	octets[2] = must(strconv.ParseUint(ipString[16:24], base, INT_SIZE))
+	octets[3] = must(strconv.ParseUint(ipString[24:32], base, INT_SIZE))
 
 	return octets
 }

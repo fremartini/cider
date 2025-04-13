@@ -79,7 +79,9 @@ func Test_NetworkPortionBinary(t *testing.T) {
 		input    *cidr.CIDRBlock
 		expected string
 	}{
-		"/0": {input: cidr.NewBlock("10.0.0.0/0"), expected: "00001010.00000000.00000000.00000000"},
+		"10.0.0.0/8":     {input: cidr.NewBlock("10.0.0.0/8"), expected: "00001010.00000000.00000000.00000000"},
+		"172.16.0.0/12":  {input: cidr.NewBlock("172.16.0.0/12"), expected: "10101100.00010000.00000000.00000000"},
+		"192.168.0.0/16": {input: cidr.NewBlock("192.168.0.0/16"), expected: "11000000.10101000.00000000.00000000"},
 	}
 
 	for name, test := range tests {
@@ -206,7 +208,12 @@ func Test_StartAddressOfNextBlock(t *testing.T) {
 		input    *cidr.CIDRBlock
 		expected string
 	}{
-		"/17": {input: cidr.NewBlock("10.0.0.0/17"), expected: "10.0.128.0"},
+		"10.0.0.0/8":     {input: cidr.NewBlock("10.0.0.0/8"), expected: "11.0.0.0"},
+		"127.0.0.0/8":    {input: cidr.NewBlock("127.0.0.0/8"), expected: "128.0.0.0"},
+		"169.254.0.0/16": {input: cidr.NewBlock("169.254.0.0/16"), expected: "169.255.0.0"},
+		"172.16.0.0/12":  {input: cidr.NewBlock("172.16.0.0/12"), expected: "172.32.0.0"},
+		"192.0.2.0/24":   {input: cidr.NewBlock("192.0.2.0/24"), expected: "192.0.3.0"},
+		"192.168.0.0/16": {input: cidr.NewBlock("192.168.0.0/16"), expected: "192.169.0.0"},
 	}
 
 	for name, test := range tests {
