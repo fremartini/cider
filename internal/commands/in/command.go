@@ -23,17 +23,17 @@ func (h *handler) Handle(args []string) error {
 		return cidr.NewBlock(i)
 	})
 
-	inRange := list.Filter(ranges, func(cidr *cidr.CIDRBlock) bool {
+	blocksInRange := list.Filter(ranges, func(cidr *cidr.CIDRBlock) bool {
 		return cidr.Contains(ip)
 	})
 
-	if len(inRange) == 0 {
+	if len(blocksInRange) == 0 {
 		fmt.Printf("%s is not in any of the provided ranges\n", ip)
 		return nil
 	}
 
-	for _, ip := range inRange {
-		fmt.Println(ip)
+	for _, block := range blocksInRange {
+		fmt.Printf("%s/%d\n", block.Network, block.HostPortion)
 	}
 
 	return nil
