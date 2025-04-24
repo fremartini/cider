@@ -24,7 +24,7 @@ func (h *handler) Handle(args []string) error {
 	})
 
 	blocksInRange := list.Filter(ranges, func(cidr *cidr.CIDRBlock) bool {
-		return cidr.Contains(ip)
+		return cidr.ContainsIp(ip)
 	})
 
 	if len(blocksInRange) == 0 {

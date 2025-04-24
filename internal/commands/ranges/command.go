@@ -62,9 +62,9 @@ func defaultCidrBlockFromHostPortion(hostPortion int) *cidr.CIDRBlock {
 func printCidrBlocks(blocks []*cidr.CIDRBlock) error {
 	w := tabwriter.NewWriter(os.Stdout, 2, 4, 1, ' ', 0)
 
-	fmt.Fprint(w, "Cidr\tSubnet mask\tAddresses\tAzure addresses\n")
+	fmt.Fprint(w, "Cidr\tMask\tAddresses\tAzure addresses\n")
 	for _, block := range blocks {
-		fmt.Fprintf(w, "/%v\t%s\t%v\t%s\n", block.HostPortion, block.SubnetMask(), block.AvailableHosts(), block.AvailableAzureHosts())
+		fmt.Fprintf(w, "/%v\t%s\t%v\t%s\n", block.HostPortion, block.Mask(), block.AvailableHosts(), block.AvailableAzureHosts())
 	}
 
 	return w.Flush()

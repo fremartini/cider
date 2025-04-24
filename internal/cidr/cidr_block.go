@@ -40,7 +40,7 @@ func (b *CIDRBlock) Subnet(sizes []int) ([]string, error) {
 	for _, size := range sizes {
 		subnetBlock := NewBlock(fmt.Sprintf("%s/%v", next.Network, size))
 
-		if !b.Contains(subnetBlock.Network) {
+		if !b.ContainsIp(subnetBlock.Network) {
 			return nil, fmt.Errorf("invalid configuration: subnet %s/%v is outside provided network range %s/%v", next.Network, size, b.Network, b.HostPortion)
 		}
 
@@ -53,10 +53,12 @@ func (b *CIDRBlock) Subnet(sizes []int) ([]string, error) {
 }
 
 // https://stackoverflow.com/questions/9622967/how-to-see-if-an-ip-address-belongs-inside-of-a-range-of-ips-using-cidr-notation
-func (b *CIDRBlock) Contains(ip string) bool {
-	IP_addr := ipToDecimal(ip)
-	CIDR_addr := ipToDecimal(b.Network)
-	CIDR_mask := -1 << (INT_SIZE - b.HostPortion)
+func (outer *CIDRBlock) ContainsIp(inner string) bool {
+	innerIp := strings.Split(inner, "/")[0]
+
+	IP_addr := ipToDecimal(innerIp)
+	CIDR_addr := ipToDecimal(outer.Network)
+	CIDR_mask := -1 << (INT_SIZE - outer.HostPortion)
 
 	return (IP_addr & CIDR_mask) == (CIDR_addr & CIDR_mask)
 }
@@ -88,7 +90,7 @@ func toBin(s string) string {
 	return paddedBynaryString
 }
 
-func (b *CIDRBlock) SubnetMask() string {
+func (b *CIDRBlock) Mask() string {
 	ones := strings.Repeat("1", b.HostPortion)
 	zeroes := strings.Repeat("0", INT_SIZE-b.HostPortion)
 
