@@ -30,7 +30,7 @@ func (h *handler) Handle(args []string) error {
 	entries := []pair{
 		{item1: "Address range", item2: fmt.Sprintf("%s - %s", block.NetworkAddress(), block.BroadcastAddress())},
 		{item1: "Start of next block", item2: block.StartAddressOfNextBlock()},
-		{item1: "Mask", item2: fmt.Sprintf("%s (%s)", fmt.Sprintf("/%v", block.HostPortion), block.Mask())},
+		{item1: "Mask", item2: fmt.Sprintf("%s (%s)", fmt.Sprintf("/%v", block.Host), block.Mask())},
 		{item1: "Addresses", item2: fmt.Sprintf("%v", block.AvailableHosts())},
 		{item1: "Azure addresses", item2: block.AvailableAzureHosts()},
 	}

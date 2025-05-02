@@ -15,8 +15,8 @@ const (
 )
 
 type CIDRBlock struct {
-	Network     string
-	HostPortion int
+	Network string
+	Host    int
 }
 
 func NewBlock(network string) *CIDRBlock {
@@ -26,8 +26,8 @@ func NewBlock(network string) *CIDRBlock {
 	hostPortion := networkAndHostPortion[1]
 
 	return &CIDRBlock{
-		Network:     networkPortion,
-		HostPortion: must(strconv.Atoi(hostPortion)),
+		Network: networkPortion,
+		Host:    must(strconv.Atoi(hostPortion)),
 	}
 }
 
@@ -40,11 +40,11 @@ func (b *CIDRBlock) Subnet(sizes []int) ([]string, error) {
 	for _, size := range sizes {
 		subnetBlock := NewBlock(fmt.Sprintf("%s/%v", next.Network, size))
 
-		if !b.ContainsIp(subnetBlock.Network) {
-			return nil, fmt.Errorf("invalid configuration: subnet %s/%v is outside provided network range %s/%v", next.Network, size, b.Network, b.HostPortion)
+		if !b.Contains(subnetBlock.Network) {
+			return nil, fmt.Errorf("invalid configuration: subnet %s/%v is outside provided network range %s/%v", next.Network, size, b.Network, b.Host)
 		}
 
-		subnets = append(subnets, fmt.Sprintf("%s/%v", subnetBlock.Network, subnetBlock.HostPortion))
+		subnets = append(subnets, fmt.Sprintf("%s/%v", subnetBlock.Network, subnetBlock.Host))
 
 		next = NewBlock(fmt.Sprintf("%s/%v", subnetBlock.StartAddressOfNextBlock(), size))
 	}
@@ -53,12 +53,12 @@ func (b *CIDRBlock) Subnet(sizes []int) ([]string, error) {
 }
 
 // https://stackoverflow.com/questions/9622967/how-to-see-if-an-ip-address-belongs-inside-of-a-range-of-ips-using-cidr-notation
-func (outer *CIDRBlock) ContainsIp(inner string) bool {
-	innerIp := strings.Split(inner, "/")[0]
+func (outer *CIDRBlock) Contains(inner string) bool {
+	innerNetwork := strings.Split(inner, "/")[0]
 
-	IP_addr := ipToDecimal(innerIp)
+	IP_addr := ipToDecimal(innerNetwork)
 	CIDR_addr := ipToDecimal(outer.Network)
-	CIDR_mask := -1 << (INT_SIZE - outer.HostPortion)
+	CIDR_mask := -1 << (INT_SIZE - outer.Host)
 
 	return (IP_addr & CIDR_mask) == (CIDR_addr & CIDR_mask)
 }
@@ -91,8 +91,8 @@ func toBin(s string) string {
 }
 
 func (b *CIDRBlock) Mask() string {
-	ones := strings.Repeat("1", b.HostPortion)
-	zeroes := strings.Repeat("0", INT_SIZE-b.HostPortion)
+	ones := strings.Repeat("1", b.Host)
+	zeroes := strings.Repeat("0", INT_SIZE-b.Host)
 
 	mask := ones + zeroes
 
@@ -102,7 +102,7 @@ func (b *CIDRBlock) Mask() string {
 }
 
 func (b *CIDRBlock) AvailableHosts() uint {
-	numAddresses := math.Pow(2, float64(INT_SIZE)-float64(b.HostPortion))
+	numAddresses := math.Pow(2, float64(INT_SIZE)-float64(b.Host))
 
 	return uint(numAddresses)
 }
@@ -133,9 +133,9 @@ func (b *CIDRBlock) StartAddressOfNextBlock() string {
 }
 
 func (b *CIDRBlock) NetworkAddress() string {
-	ipBin := strings.ReplaceAll(b.NetworkPortionBinary(), ".", "")[0:b.HostPortion]
+	ipBin := strings.ReplaceAll(b.NetworkPortionBinary(), ".", "")[0:b.Host]
 
-	broadcast := ipBin + strings.Repeat("0", INT_SIZE-b.HostPortion)
+	broadcast := ipBin + strings.Repeat("0", INT_SIZE-b.Host)
 
 	octets := stringToOctets(broadcast)
 
@@ -144,9 +144,9 @@ func (b *CIDRBlock) NetworkAddress() string {
 
 func (b *CIDRBlock) BroadcastAddress() string {
 	// https://stackoverflow.com/questions/1470792/how-to-calculate-the-ip-range-when-the-ip-address-and-the-netmask-is-given
-	ipBin := strings.ReplaceAll(b.NetworkPortionBinary(), ".", "")[0:b.HostPortion]
+	ipBin := strings.ReplaceAll(b.NetworkPortionBinary(), ".", "")[0:b.Host]
 
-	broadcast := ipBin + strings.Repeat("1", INT_SIZE-b.HostPortion)
+	broadcast := ipBin + strings.Repeat("1", INT_SIZE-b.Host)
 
 	octets := stringToOctets(broadcast)
 

@@ -64,7 +64,7 @@ func printCidrBlocks(blocks []*cidr.CIDRBlock) error {
 
 	fmt.Fprint(w, "Cidr\tMask\tAddresses\tAzure addresses\n")
 	for _, block := range blocks {
-		fmt.Fprintf(w, "/%v\t%s\t%v\t%s\n", block.HostPortion, block.Mask(), block.AvailableHosts(), block.AvailableAzureHosts())
+		fmt.Fprintf(w, "/%v\t%s\t%v\t%s\n", block.Host, block.Mask(), block.AvailableHosts(), block.AvailableAzureHosts())
 	}
 
 	return w.Flush()
