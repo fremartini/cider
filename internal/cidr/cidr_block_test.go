@@ -57,8 +57,10 @@ func Test_Contains(t *testing.T) {
 		ipRange  *cidr.CIDRBlock
 		expected bool
 	}{
-		"ip inside range":  {ip: "10.50.30.7", ipRange: cidr.NewBlock("10.0.0.0/8"), expected: true},
-		"ip outside range": {ip: "10.50.30.7", ipRange: cidr.NewBlock("10.0.0.0/28"), expected: false},
+		"ip inside range":     {ip: "10.0.0.5", ipRange: cidr.NewBlock("10.0.0.0/28"), expected: true},
+		"ip outside range":    {ip: "10.0.0.17", ipRange: cidr.NewBlock("10.0.0.0/28"), expected: false},
+		"range inside range":  {ip: "10.0.0.4/30", ipRange: cidr.NewBlock("10.0.0.0/28"), expected: true},
+		"range outside range": {ip: "10.0.0.16/29", ipRange: cidr.NewBlock("10.0.0.0/28"), expected: false},
 	}
 
 	for name, test := range tests {
@@ -97,7 +99,7 @@ func Test_NetworkPortionBinary(t *testing.T) {
 	}
 }
 
-func Test_SubnetMask(t *testing.T) {
+func Test_Mask(t *testing.T) {
 	tests := map[string]struct {
 		input    *cidr.CIDRBlock
 		expected string
@@ -141,10 +143,10 @@ func Test_SubnetMask(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			actual := test.input.SubnetMask()
+			actual := test.input.Mask()
 
 			if actual != test.expected {
-				t.Fatalf("%s returns correct subnet mask: got %v expected %v", name, actual, test.expected)
+				t.Fatalf("%s returns correct mask: got %v expected %v", name, actual, test.expected)
 			}
 		})
 	}

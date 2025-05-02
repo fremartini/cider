@@ -17,23 +17,23 @@ func (h *handler) Handle(args []string) error {
 		return fmt.Errorf("command expects at least 2 arguments")
 	}
 
-	ip := args[0]
-
 	ranges := list.Map(args[1:], func(i string) *cidr.CIDRBlock {
 		return cidr.NewBlock(i)
 	})
 
+	ipOrRange := args[0]
+
 	blocksInRange := list.Filter(ranges, func(cidr *cidr.CIDRBlock) bool {
-		return cidr.Contains(ip)
+		return cidr.Contains(ipOrRange)
 	})
 
 	if len(blocksInRange) == 0 {
-		fmt.Printf("%s is not in any of the provided ranges\n", ip)
+		fmt.Printf("%s is not in any of the provided ranges\n", ipOrRange)
 		return nil
 	}
 
 	for _, block := range blocksInRange {
-		fmt.Printf("%s/%d\n", block.Network, block.HostPortion)
+		fmt.Printf("%s/%d\n", block.Network, block.Host)
 	}
 
 	return nil
