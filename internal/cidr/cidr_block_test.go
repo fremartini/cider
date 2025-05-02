@@ -76,6 +76,27 @@ func Test_Contains(t *testing.T) {
 	}
 }
 
+func Test_ToDecimal(t *testing.T) {
+	tests := map[string]struct {
+		block    *cidr.CIDRBlock
+		expected int
+	}{
+		"decimal": {block: cidr.NewBlock("10.0.0.5/10"), expected: 167772165},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			actual := test.block.ToDecimal()
+
+			if actual != test.expected {
+				t.Fatalf("%s: got %v expected %v", name, actual, test.expected)
+			}
+		})
+	}
+}
+
 func Test_NetworkPortionBinary(t *testing.T) {
 	tests := map[string]struct {
 		input    *cidr.CIDRBlock
@@ -84,6 +105,7 @@ func Test_NetworkPortionBinary(t *testing.T) {
 		"10.0.0.0/8":     {input: cidr.NewBlock("10.0.0.0/8"), expected: "00001010.00000000.00000000.00000000"},
 		"172.16.0.0/12":  {input: cidr.NewBlock("172.16.0.0/12"), expected: "10101100.00010000.00000000.00000000"},
 		"192.168.0.0/16": {input: cidr.NewBlock("192.168.0.0/16"), expected: "11000000.10101000.00000000.00000000"},
+		"10.0.0.5":       {input: cidr.NewBlock("10.0.0.5"), expected: "00001010.00000000.00000000.00000101"},
 	}
 
 	for name, test := range tests {

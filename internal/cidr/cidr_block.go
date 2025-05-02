@@ -86,8 +86,12 @@ func (b *CIDRBlock) NetworkPortionBinary() string {
 func toBin(s string) string {
 	asInt := must(strconv.ParseUint(s, 10, INT_SIZE))
 	asBinaryString := strconv.FormatUint(asInt, 2)
-	paddedBynaryString := utils.PadLeft(asBinaryString, '0', 8)
-	return paddedBynaryString
+	paddedBinaryString := utils.PadLeft(asBinaryString, '0', 8)
+	return paddedBinaryString
+}
+
+func (b *CIDRBlock) ToDecimal() int {
+	return ipToDecimal(b.Network)
 }
 
 func (b *CIDRBlock) Mask() string {

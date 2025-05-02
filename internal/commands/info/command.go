@@ -33,6 +33,8 @@ func (h *handler) Handle(args []string) error {
 		{item1: "Mask", item2: fmt.Sprintf("%s (%s)", fmt.Sprintf("/%v", block.Host), block.Mask())},
 		{item1: "Addresses", item2: fmt.Sprintf("%v", block.AvailableHosts())},
 		{item1: "Azure addresses", item2: block.AvailableAzureHosts()},
+		{item1: "Binary", item2: block.NetworkPortionBinary()},
+		{item1: "Decimal", item2: fmt.Sprintf("%v", block.ToDecimal())},
 	}
 
 	printOutput(entries)
