@@ -24,7 +24,7 @@ func (*handler) Handle(args []string) error {
 		return n
 	})
 
-	s := strings.Split("/", rangeToSplit)
+	s := strings.Split(rangeToSplit, "/")
 
 	ip := ip.NewIp(s[0])
 

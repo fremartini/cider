@@ -22,7 +22,7 @@ func (h *handler) Handle(args []string) error {
 	}
 
 	ranges := list.Map(args[1:], func(i string) *cidr.CidrBlock {
-		s := strings.Split("/", i)
+		s := strings.Split(i, "/")
 
 		ip := ip.NewIp(s[0])
 
@@ -35,7 +35,7 @@ func (h *handler) Handle(args []string) error {
 
 	var blocksInRange []*cidr.CidrBlock
 	if strings.Contains(ipOrRange, "/") {
-		s := strings.Split("/", ipOrRange)
+		s := strings.Split(ipOrRange, "/")
 
 		ip := ip.NewIp(s[0])
 

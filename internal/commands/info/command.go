@@ -29,7 +29,7 @@ func (h *handler) Handle(args []string) error {
 
 	ipString := args[0]
 
-	s := strings.Split("/", ipString)
+	s := strings.Split(ipString, "/")
 
 	ip := ip.NewIp(s[0])
 
