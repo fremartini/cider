@@ -2,6 +2,7 @@ package ranges
 
 import (
 	"cider/internal/cidr"
+	"cider/internal/ip"
 	"fmt"
 	"os"
 	"strconv"
@@ -56,7 +57,7 @@ func calculateAllCidrBlocks() []*cidr.CIDRBlock {
 }
 
 func defaultCidrBlockFromHostPortion(hostPortion int) *cidr.CIDRBlock {
-	return cidr.NewBlock(fmt.Sprintf("10.0.0.0/%v", hostPortion))
+	return cidr.NewBlock(ip.NewIp("10.0.0.0"), fmt.Sprintf("%v", hostPortion))
 }
 
 func printCidrBlocks(blocks []*cidr.CIDRBlock) error {

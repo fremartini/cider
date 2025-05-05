@@ -1,6 +1,7 @@
 package cidr
 
 import (
+	"cider/internal/ip"
 	"cider/internal/list"
 	"cider/internal/utils"
 	"fmt"
@@ -15,19 +16,14 @@ const (
 )
 
 type CIDRBlock struct {
-	Network string
-	Host    int
+	Ip   *ip.Ip
+	Host int
 }
 
-func NewBlock(network string) *CIDRBlock {
-	networkAndHostPortion := strings.Split(network, "/")
-
-	networkPortion := networkAndHostPortion[0]
-	hostPortion := networkAndHostPortion[1]
-
+func NewBlock(ip *ip.Ip, host string) *CIDRBlock {
 	return &CIDRBlock{
-		Network: networkPortion,
-		Host:    must(strconv.Atoi(hostPortion)),
+		Ip:   ip,
+		Host: must(strconv.Atoi(host)),
 	}
 }
 
@@ -38,15 +34,15 @@ func (b *CIDRBlock) Subnet(sizes []int) ([]string, error) {
 	next := b
 	subnets := []string{}
 	for _, size := range sizes {
-		subnetBlock := NewBlock(fmt.Sprintf("%s/%v", next.Network, size))
+		subnetBlock := NewBlock(next.Ip, fmt.Sprintf("%v", size))
 
-		if !b.Contains(subnetBlock.Network) {
-			return nil, fmt.Errorf("invalid configuration: subnet %s/%v is outside provided network range %s/%v", next.Network, size, b.Network, b.Host)
+		if !b.Contains(subnetBlock.Ip.Ip()) {
+			return nil, fmt.Errorf("invalid configuration: subnet %s/%v is outside provided network range %s/%v", next.Ip, size, b.Ip, b.Host)
 		}
 
-		subnets = append(subnets, fmt.Sprintf("%s/%v", subnetBlock.Network, subnetBlock.Host))
+		subnets = append(subnets, fmt.Sprintf("%s/%v", subnetBlock.Ip.Ip(), subnetBlock.Host))
 
-		next = NewBlock(fmt.Sprintf("%s/%v", subnetBlock.StartAddressOfNextBlock(), size))
+		next = NewBlock(ip.NewIp(subnetBlock.StartAddressOfNextBlock()), fmt.Sprintf("%v", size))
 	}
 
 	return subnets, nil
@@ -56,28 +52,15 @@ func (b *CIDRBlock) Subnet(sizes []int) ([]string, error) {
 func (outer *CIDRBlock) Contains(inner string) bool {
 	innerNetwork := strings.Split(inner, "/")[0]
 
-	IP_addr := ipToDecimal(innerNetwork)
-	CIDR_addr := ipToDecimal(outer.Network)
+	IP_addr := ip.NewIp(innerNetwork).ToDecimal()
+	CIDR_addr := outer.Ip.ToDecimal()
 	CIDR_mask := -1 << (INT_SIZE - outer.Host)
 
 	return (IP_addr & CIDR_mask) == (CIDR_addr & CIDR_mask)
 }
 
-// http://www.aboutmyip.com/AboutMyXApp/IP2Integer.jsp
-func ipToDecimal(ip string) int {
-	parts := strings.Split(ip, ".")
-
-	base := 10
-	octet1 := must(strconv.ParseUint(parts[0], base, INT_SIZE))
-	octet2 := must(strconv.ParseUint(parts[1], base, INT_SIZE))
-	octet3 := must(strconv.ParseUint(parts[2], base, INT_SIZE))
-	octet4 := must(strconv.ParseUint(parts[3], base, INT_SIZE))
-
-	return int((octet1 * 16777216) + (octet2 * 65536) + (octet3 * 256) + octet4)
-}
-
 func (b *CIDRBlock) NetworkPortionBinary() string {
-	octets := strings.Split(b.Network, ".")
+	octets := strings.Split(b.Ip.Ip(), ".")
 	octets = list.Map(octets, toBin)
 
 	return fmt.Sprintf("%s.%s.%s.%s", octets[0], octets[1], octets[2], octets[3])
@@ -91,7 +74,7 @@ func toBin(s string) string {
 }
 
 func (b *CIDRBlock) ToDecimal() int {
-	return ipToDecimal(b.Network)
+	return b.Ip.ToDecimal()
 }
 
 func (b *CIDRBlock) Mask() string {

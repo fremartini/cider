@@ -2,10 +2,12 @@ package info
 
 import (
 	"cider/internal/cidr"
+	"cider/internal/ip"
 	"cider/internal/list"
 	"cider/internal/utils"
 	"fmt"
 	"math"
+	"strings"
 )
 
 type handler struct{}
@@ -23,9 +25,13 @@ func (h *handler) Handle(args []string) error {
 		return fmt.Errorf("command expects exactly one argument")
 	}
 
-	ip := args[0]
+	ipString := args[0]
 
-	block := cidr.NewBlock(ip)
+	s := strings.Split("/", ipString)
+
+	ip := ip.NewIp(s[0])
+
+	block := cidr.NewBlock(ip, s[1])
 
 	entries := []pair{
 		{item1: "Address range", item2: fmt.Sprintf("%s - %s", block.NetworkAddress(), block.BroadcastAddress())},

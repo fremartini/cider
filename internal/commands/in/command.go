@@ -2,8 +2,10 @@ package in
 
 import (
 	"cider/internal/cidr"
+	"cider/internal/ip"
 	"cider/internal/list"
 	"fmt"
+	"strings"
 )
 
 type handler struct{}
@@ -18,7 +20,11 @@ func (h *handler) Handle(args []string) error {
 	}
 
 	ranges := list.Map(args[1:], func(i string) *cidr.CIDRBlock {
-		return cidr.NewBlock(i)
+		s := strings.Split("/", i)
+
+		ip := ip.NewIp(s[0])
+
+		return cidr.NewBlock(ip, s[1])
 	})
 
 	ipOrRange := args[0]
@@ -33,7 +39,7 @@ func (h *handler) Handle(args []string) error {
 	}
 
 	for _, block := range blocksInRange {
-		fmt.Printf("%s/%d\n", block.Network, block.Host)
+		fmt.Printf("%s/%d\n", block.Ip, block.Host)
 	}
 
 	return nil

@@ -2,9 +2,11 @@ package subnet
 
 import (
 	"cider/internal/cidr"
+	"cider/internal/ip"
 	"cider/internal/list"
 	"fmt"
 	"strconv"
+	"strings"
 )
 
 type handler struct{}
@@ -21,7 +23,11 @@ func (*handler) Handle(args []string) error {
 		return n
 	})
 
-	block := cidr.NewBlock(rangeToSplit)
+	s := strings.Split("/", rangeToSplit)
+
+	ip := ip.NewIp(s[0])
+
+	block := cidr.NewBlock(ip, s[1])
 
 	subnets, err := block.Subnet(sizes)
 
