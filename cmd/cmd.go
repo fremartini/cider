@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"io"
 	"log"
 	"os"
 	"strconv"
@@ -9,7 +10,7 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-func Execute() {
+func Execute(stdin io.Reader, stdout, stderr io.Writer) {
 	cmd := &cli.Command{
 		Name:  "cider",
 		Usage: "cli tool to help with common IP related tasks",
@@ -20,6 +21,9 @@ func Execute() {
 			newInfo(),
 			newVersion(),
 		},
+		Writer:    stdout,
+		ErrWriter: stderr,
+		Reader:    stdin,
 	}
 
 	args := os.Args
