@@ -4,9 +4,11 @@ import (
 	"cider/internal/cidr"
 	"cider/internal/ip"
 	"cider/internal/list"
+	"cider/internal/must"
 	"cider/internal/utils"
 	"fmt"
 	"math"
+	"strconv"
 	"strings"
 )
 
@@ -31,7 +33,9 @@ func (h *handler) Handle(args []string) error {
 
 	ip := ip.NewIp(s[0])
 
-	block := cidr.NewBlock(ip, s[1])
+	host := int(must.Must(strconv.ParseInt(s[1], 10, 32)))
+
+	block := cidr.NewBlock(ip, host)
 
 	entries := []pair{
 		{item1: "Address range", item2: fmt.Sprintf("%s - %s", block.NetworkAddress(), block.BroadcastAddress())},

@@ -4,6 +4,7 @@ import (
 	"cider/internal/cidr"
 	"cider/internal/ip"
 	"cider/internal/list"
+	"cider/internal/must"
 	"fmt"
 	"strconv"
 	"strings"
@@ -27,7 +28,9 @@ func (*handler) Handle(args []string) error {
 
 	ip := ip.NewIp(s[0])
 
-	block := cidr.NewBlock(ip, s[1])
+	host := int(must.Must(strconv.ParseInt(s[1], 10, 32)))
+
+	block := cidr.NewBlock(ip, host)
 
 	subnets, err := block.Subnet(sizes)
 
