@@ -6,14 +6,19 @@ import (
 	"cider/internal/list"
 	"cider/internal/must"
 	"fmt"
+	"io"
 	"strconv"
 	"strings"
 )
 
-type handler struct{}
+type handler struct {
+	stdout io.Writer
+}
 
-func New() *handler {
-	return &handler{}
+func New(stdout io.Writer) *handler {
+	return &handler{
+		stdout: stdout,
+	}
 }
 
 func (h *handler) Handle(args []string) error {
@@ -54,12 +59,12 @@ func (h *handler) Handle(args []string) error {
 	}
 
 	if len(blocksInRange) == 0 {
-		fmt.Printf("%s is not in any of the provided ranges\n", ipOrRange)
+		fmt.Fprintf(h.stdout, "%s is not in any of the provided ranges\n", ipOrRange)
 		return nil
 	}
 
 	for _, block := range blocksInRange {
-		fmt.Printf("%s/%d\n", block.Ip, block.Host)
+		fmt.Fprintf(h.stdout, "%s/%d\n", block.Ip, block.Host)
 	}
 
 	return nil

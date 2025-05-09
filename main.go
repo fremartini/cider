@@ -6,5 +6,5 @@ import (
 )
 
 func main() {
-	cmd.Execute(os.Stdin, os.Stdout, os.Stderr)
+	cmd.Execute(os.Stdout, os.Stderr, os.Args)
 }

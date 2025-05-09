@@ -7,15 +7,20 @@ import (
 	"cider/internal/must"
 	"cider/internal/utils"
 	"fmt"
+	"io"
 	"math"
 	"strconv"
 	"strings"
 )
 
-type handler struct{}
+type handler struct {
+	stdout io.Writer
+}
 
-func New() *handler {
-	return &handler{}
+func New(stdout io.Writer) *handler {
+	return &handler{
+		stdout: stdout,
+	}
 }
 
 type pair struct {
@@ -47,12 +52,12 @@ func (h *handler) Handle(args []string) error {
 		{item1: "Decimal", item2: fmt.Sprintf("%v", block.ToDecimal())},
 	}
 
-	printOutput(entries)
+	h.printOutput(entries)
 
 	return nil
 }
 
-func printOutput(entries []pair) {
+func (h *handler) printOutput(entries []pair) {
 	keys := []string{}
 	for _, pair := range entries {
 		keys = append(keys, pair.item1)
@@ -63,6 +68,6 @@ func printOutput(entries []pair) {
 	})
 
 	for _, pair := range entries {
-		fmt.Printf("%s : %v\n", utils.PadRight(pair.item1, ' ', longestTitle), pair.item2)
+		fmt.Fprintf(h.stdout, "%s : %v\n", utils.PadRight(pair.item1, ' ', longestTitle), pair.item2)
 	}
 }
