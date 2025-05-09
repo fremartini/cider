@@ -64,7 +64,7 @@ func (h *handler) Handle(args []string) error {
 	}
 
 	for _, block := range blocksInRange {
-		fmt.Fprintf(h.stdout, "%s/%d\n", block.Ip, block.Host)
+		fmt.Fprintf(h.stdout, "%s/%d\n", block.Ip.Ip(), block.Host)
 	}
 
 	return nil

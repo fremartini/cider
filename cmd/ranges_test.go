@@ -1,4 +1,4 @@
-package cmd
+package cmd_test
 
 import (
 	"testing"
@@ -9,6 +9,12 @@ func TestRanges(t *testing.T) {
 		{
 			name:      "single range",
 			input:     []string{"cider", "ranges", "21"},
+			stdOutput: "Cidr Mask          Addresses Azure addresses\n/21  255.255.248.0 2048      2043\n",
+			stdErr:    "",
+		},
+		{
+			name:      "single range shorthand",
+			input:     []string{"cider", "r", "21"},
 			stdOutput: "Cidr Mask          Addresses Azure addresses\n/21  255.255.248.0 2048      2043\n",
 			stdErr:    "",
 		},

@@ -1,7 +1,8 @@
-package cmd
+package cmd_test
 
 import (
 	"bytes"
+	"cider/cmd"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -35,7 +36,7 @@ func executeTestCasesWithCustomAssertion(
 			stdOut := new(bytes.Buffer)
 			stdErr := new(bytes.Buffer)
 
-			Execute(stdOut, stdErr, tc.input)
+			cmd.Execute(stdOut, stdErr, tc.input)
 
 			assertion(t, tc, stdOut.String(), stdErr.String())
 		})

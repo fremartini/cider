@@ -8,7 +8,7 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-var version string
+var version string = "version"
 
 func newVersion(stdout io.Writer) *cli.Command {
 	return &cli.Command{

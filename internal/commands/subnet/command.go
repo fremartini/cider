@@ -22,6 +22,10 @@ func New(stdout io.Writer) *handler {
 }
 
 func (h *handler) Handle(args []string) error {
+	if len(args) < 2 {
+		return fmt.Errorf("command expects at least 2 arguments")
+	}
+
 	rangeToSplit := args[0]
 	sizes := list.Map(args[1:], func(s string) int {
 		n, _ := strconv.Atoi(s)
@@ -44,7 +48,7 @@ func (h *handler) Handle(args []string) error {
 	}
 
 	for _, subnet := range subnets {
-		fmt.Fprint(h.stdout, subnet)
+		fmt.Fprintln(h.stdout, subnet)
 	}
 
 	return nil
