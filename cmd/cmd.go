@@ -2,27 +2,25 @@ package cmd
 
 import (
 	"context"
-	"log"
-	"os"
+	"fmt"
+	"io"
 	"strconv"
 
 	"github.com/urfave/cli/v3"
 )
 
-func Execute() {
+func Execute(stdout, stderr io.Writer, args []string) {
 	cmd := &cli.Command{
 		Name:  "cider",
 		Usage: "cli tool to help with common IP related tasks",
 		Commands: []*cli.Command{
-			newRanges(),
-			newIn(),
-			newSubnet(),
-			newInfo(),
-			newVersion(),
+			newRanges(stdout),
+			newIn(stdout),
+			newSubnet(stdout),
+			newInfo(stdout),
+			newVersion(stdout),
 		},
 	}
-
-	args := os.Args
 
 	// if the first arg is a number, treat it as the "ranges" command
 	if len(args) == 2 {
@@ -34,6 +32,6 @@ func Execute() {
 	}
 
 	if err := cmd.Run(context.Background(), args); err != nil {
-		log.Fatal(err)
+		fmt.Fprint(stderr, err)
 	}
 }

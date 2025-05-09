@@ -3,11 +3,12 @@ package cmd
 import (
 	"cider/internal/commands/ranges"
 	"context"
+	"io"
 
 	"github.com/urfave/cli/v3"
 )
 
-func newRanges() *cli.Command {
+func newRanges(stdout io.Writer) *cli.Command {
 	return &cli.Command{
 		Name:    "ranges",
 		Usage:   "Display all CIDR ranges",
@@ -15,7 +16,7 @@ func newRanges() *cli.Command {
 		Action: func(_ context.Context, command *cli.Command) error {
 			arg := command.Args().First()
 
-			handler := ranges.New()
+			handler := ranges.New(stdout)
 
 			return handler.Handle(arg)
 		},

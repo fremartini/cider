@@ -2,8 +2,9 @@ package ranges
 
 import (
 	"cider/internal/cidr"
+	"cider/internal/ip"
 	"fmt"
-	"os"
+	"io"
 	"strconv"
 	"text/tabwriter"
 )
@@ -12,18 +13,22 @@ const (
 	INT_SIZE = 32
 )
 
-type handler struct{}
-
-func New() *handler {
-	return &handler{}
+type handler struct {
+	stdout io.Writer
 }
 
-func (*handler) Handle(arg string) error {
+func New(stdout io.Writer) *handler {
+	return &handler{
+		stdout: stdout,
+	}
+}
+
+func (h *handler) Handle(arg string) error {
 	// no args
 	if arg == "" {
 		table := calculateAllCidrBlocks()
 
-		return printCidrBlocks(table)
+		return h.printCidrBlocks(table)
 	}
 
 	// argument was given. Try to parse it
@@ -39,13 +44,13 @@ func (*handler) Handle(arg string) error {
 
 	block := defaultCidrBlockFromHostPortion(int(hostPortion))
 
-	blocks := []*cidr.CIDRBlock{block}
+	blocks := []*cidr.CidrBlock{block}
 
-	return printCidrBlocks(blocks)
+	return h.printCidrBlocks(blocks)
 }
 
-func calculateAllCidrBlocks() []*cidr.CIDRBlock {
-	blocks := []*cidr.CIDRBlock{}
+func calculateAllCidrBlocks() []*cidr.CidrBlock {
+	blocks := []*cidr.CidrBlock{}
 	for i := range INT_SIZE + 1 {
 		block := defaultCidrBlockFromHostPortion(i)
 
@@ -55,12 +60,12 @@ func calculateAllCidrBlocks() []*cidr.CIDRBlock {
 	return blocks
 }
 
-func defaultCidrBlockFromHostPortion(hostPortion int) *cidr.CIDRBlock {
-	return cidr.NewBlock(fmt.Sprintf("10.0.0.0/%v", hostPortion))
+func defaultCidrBlockFromHostPortion(hostPortion int) *cidr.CidrBlock {
+	return cidr.NewBlock(ip.NewIp("10.0.0.0"), hostPortion)
 }
 
-func printCidrBlocks(blocks []*cidr.CIDRBlock) error {
-	w := tabwriter.NewWriter(os.Stdout, 2, 4, 1, ' ', 0)
+func (h *handler) printCidrBlocks(blocks []*cidr.CidrBlock) error {
+	w := tabwriter.NewWriter(h.stdout, 2, 4, 1, ' ', 0)
 
 	fmt.Fprint(w, "Cidr\tMask\tAddresses\tAzure addresses\n")
 	for _, block := range blocks {
